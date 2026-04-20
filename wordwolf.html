@@ -97,7 +97,7 @@
     <div id="screen-finish" class="screen"><h1 id="finish-title">終了！</h1><button onclick="location.reload()" style="background:#666;">最初に戻る</button></div>
   </div>
 
-  <script>
+<script>
     const defaultPairs = [["りんご","なし"], ["うどん","そば"], ["ダイヤモンド","グラファイト"], ["泥棒","サンタ"]];
     let wordPairs = [], deck = [], current = 0, timer;
 
@@ -176,6 +176,7 @@
       `).join('');
     }
 
+    // ゲーム開始のロジック
     function startGame() {
       const pCount = parseInt(document.getElementById('playerCount').value);
       const wCount = parseInt(document.getElementById('wolfCount').value);
@@ -189,23 +190,74 @@
       const citizenWord = isBWolf ? pair : pair;
       const wolfWord = isBWolf ? pair : pair;
 
-      deck = Array(pCount - wCount).fill(citizenWord).concat(Array(wCount).fill(wolfWord));
+      // デッキを空にしてから再構築
+      deck = [];
+      for(let i = 0; i < (pCount - wCount); i++) deck.push(citizenWord);
+      for(let i = 0; i < wCount; i++) deck.push(wolfWord);
+      
+      // シャッフル
       deck.sort(() => Math.random() - 0.5);
       
-      current = 0; goReady();
+      current = 0;
+      goReady();
     }
 
-    function goReady() { showScreen('screen-ready'); document.getElementById('player-label').innerText = `${current + 1}人目の抽選`; }
-    function showWord() { showScreen('screen-word'); document.getElementById('display-area').innerText = deck[current]; document.getElementById('next-btn').innerText = (current === deck.length - 1) ? "全員完了" : "確認しました"; }
-    function nextStep() { if (current < deck.length - 1) { current++; goReady(); } else { startTimer(); } }
+    function goReady() {
+      showScreen('screen-ready');
+      document.getElementById('player-label').innerText = `${current + 1}人目の確認`;
+    }
+
+    function showWord() {
+      showScreen('screen-word');
+      // 表示エリアを一旦空にしてからセット
+      const displayArea = document.getElementById('display-area');
+      displayArea.innerText = deck[current];
+      
+      const nextBtn = document.getElementById('next-btn');
+      if (current === deck.length - 1) {
+        nextBtn.innerText = "全員完了（タイマー開始）";
+      } else {
+        nextBtn.innerText = "確認しました";
+      }
+    }
+
+    function nextStep() {
+      if (current < deck.length - 1) {
+        current++;
+        goReady();
+      } else {
+        startTimer();
+      }
+    }
+
     function startTimer() {
       showScreen('screen-timer');
       let sec = parseInt(document.getElementById('limitTime').value) * 60;
       updateDisplay(sec);
-      timer = setInterval(() => { sec--; updateDisplay(sec); if (sec <= 0) timeUp("時間切れ！"); }, 1000);
+      if(timer) clearInterval(timer); // 既存のタイマーがあればクリア
+      timer = setInterval(() => {
+        sec--;
+        updateDisplay(sec);
+        if (sec <= 0) timeUp("時間切れ！");
+      }, 1000);
     }
-    function updateDisplay(sec) { document.getElementById('timer-display').innerText = `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`; }
+
+    function updateDisplay(sec) {
+      const min = Math.floor(sec / 60);
+      const s = sec % 60;
+      document.getElementById('timer-display').innerText = `${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
     function forceStop() { timeUp("強制終了！"); }
-    function timeUp(txt) { clearInterval(timer); document.getElementById('finish-title').innerText = txt; showScreen('screen-finish'); }
-    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+    function timeUp(txt) {
+      clearInterval(timer);
+      document.getElementById('finish-title').innerText = txt;
+      showScreen('screen-finish');
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
   </script>
