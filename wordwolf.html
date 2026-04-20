@@ -4,260 +4,180 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>みんなで☆ワードウルフ</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="images.png">
   <style>
     :root { --primary: #1a73e8; --danger: #d93025; --bg: #f0f2f5; }
     body { font-family: sans-serif; text-align: center; padding: 20px; background-color: var(--bg); color: #333; margin: 0; }
-    .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: none; border: none; cursor: pointer; z-index: 100; color: #555; width: auto; margin: 0; padding: 5px; }
-    .sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.2); transition: 0.3s; z-index: 1000; text-align: left; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+    .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: none; border: none; cursor: pointer; z-index: 100; color: #555; }
+    .sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.2); transition: 0.3s; z-index: 1000; text-align: left; padding: 20px; overflow-y: auto; }
     .sidebar.open { right: 0; }
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
     .overlay.show { display: block; }
-    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 420px; margin: 50px auto auto; }
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 420px; margin: 50px auto; }
     .screen { display: none; }
     .active { display: block; }
     button { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 15px; font-weight: bold; }
     .btn-stop { background: var(--danger); }
     .btn-outline { background: #eee; color: #333; margin-top: 5px; }
-    .btn-info { background: #5f6368; margin-top: 20px; }
     input { padding: 10px; font-size: 16px; width: 90%; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
     .word-box { font-size: 32px; font-weight: bold; color: var(--danger); margin: 30px 0; padding: 20px; border: 4px double var(--danger); }
-    #timer-display { font-size: 60px; font-weight: bold; margin: 10px 0; }
-    .list-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px 0; user-select: none; }
-    .list-header.open span.arrow { transform: rotate(90deg); }
-    #wordListArea { display: none; margin-top: 10px; border-top: 1px solid #eee; }
-    #wordListArea.show { display: block; }
-    .word-item { font-size: 13px; border-bottom: 1px solid #eee; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
-    .delete-btn { background: #fee; color: var(--danger); width: auto; padding: 4px 8px; margin: 0; font-size: 11px; }
-    hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
-    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 2000; width: 80%; max-width: 320px; display: none; }
-    .modal.show { display: block; }
-    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .setting-row input { width: 80px; }
+    #timer-display { font-size: 60px; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <div class="overlay" id="overlay" onclick="closeAll()"></div>
-  
-  <div class="sidebar" id="sidebar">
-    <h3>設定メニュー</h3>
-    <hr>
-    <h4>単語ペアの追加</h4>
-    <input type="text" id="newWordA" placeholder="ワードA (市民)">
-    <input type="text" id="newWordB" placeholder="ワードB (人狼)">
-    <button onclick="addNewPair()">追加する</button>
-    <hr>
-    <h4>バックアップ・共有</h4>
-    <button class="btn-outline" onclick="exportData()">データを書き出す</button>
-    <button class="btn-outline" onclick="document.getElementById('importFile').click()">データを読み込む</button>
-    <input type="file" id="importFile" style="display:none;" onchange="importData(this)">
-    <hr>
-    <div class="list-header" id="listHeader" onclick="toggleWordList()">
-      <h4 style="margin:0;">登録済み単語 (<span id="wordCount">0</span>)</h4>
-      <span class="arrow">▶</span>
-    </div>
-    <div id="wordListArea"></div>
-    <hr>
-    <button class="btn-info" onclick="toggleAbout()">制作者情報</button>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="sidebar" id="sidebar">
+  <h3>設定メニュー</h3>
+  <hr>
+  <h4>単語ペアの追加</h4>
+  <input type="text" id="newWordA" placeholder="ワードA">
+  <input type="text" id="newWordB" placeholder="ワードB">
+  <button onclick="addNewPair()">追加</button>
+  <hr>
+  <h4>登録済み単語 (<span id="wordCount">0</span>)</h4>
+  <div id="wordListArea"></div>
+</div>
+
+<div class="card">
+  <div id="screen-start" class="screen active">
+    <h2>ゲーム設定</h2>
+    <input type="number" id="playerCount" value="3">
+    <input type="number" id="wolfCount" value="1">
+    <input type="number" id="limitTime" value="3">
+    <button onclick="startGame()">ゲーム開始</button>
   </div>
 
-  <div id="aboutModal" class="modal">
-    <h3>制作者について</h3>
-    <p style="text-align:left; font-size:14px; line-height:1.6;">
-      <strong>制作者：</strong> ニワトリ<br>
-      <strong>メッセージ：</strong><br>
-      不具合はないと思いたいのですが、あった場合は諦めてください。
-    </p>
-    <button onclick="toggleAbout()">閉じる</button>
+  <div id="screen-ready" class="screen">
+    <h2 id="player-label"></h2>
+    <button onclick="showWord()">ワード表示</button>
   </div>
 
-  <div class="card">
-    <div id="screen-start" class="screen active">
-      <h2>ゲーム設定</h2>
-      <div class="setting-row">
-        <label>合計人数：</label>
-        <input type="number" id="playerCount" value="3" min="3">
-      </div>
-      <div class="setting-row">
-        <label>人狼の数：</label>
-        <input type="number" id="wolfCount" value="1" min="1">
-      </div>
-      <div class="setting-row">
-        <label>制限時間 (分)：</label>
-        <input type="number" id="limitTime" value="3" min="1">
-      </div>
-      <button onclick="startGame()">ゲーム開始</button>
-    </div>
-    <div id="screen-ready" class="screen"><h2 id="player-label"></h2><p>他の方に見られないよう確認してください</p><button onclick="showWord()">ワードを表示する</button></div>
-    <div id="screen-word" class="screen"><p>あなたのワードは</p><div class="word-box" id="display-area"></div><button id="next-btn" onclick="nextStep()"></button></div>
-    <div id="screen-timer" class="screen"><h2>話し合いタイム</h2><div id="timer-display">00:00</div><button class="btn-stop" onclick="forceStop()">強制終了</button></div>
-    <div id="screen-finish" class="screen"><h1 id="finish-title">終了！</h1><button onclick="location.reload()" style="background:#666;">最初に戻る</button></div>
+  <div id="screen-word" class="screen">
+    <div class="word-box" id="display-area"></div>
+    <button onclick="nextStep()" id="next-btn"></button>
   </div>
+
+  <div id="screen-timer" class="screen">
+    <h2>話し合い</h2>
+    <div id="timer-display"></div>
+    <button onclick="forceStop()" class="btn-stop">終了</button>
+  </div>
+
+  <div id="screen-finish" class="screen">
+    <h1 id="finish-title"></h1>
+    <button onclick="location.reload()">リセット</button>
+  </div>
+</div>
 
 <script>
-    const defaultPairs = [["りんご","なし"], ["うどん","そば"], ["ダイヤモンド","グラファイト"], ["泥棒","サンタ"]];
-    let wordPairs = [], deck = [], current = 0, timer;
+const defaultPairs = [["りんご","なし"], ["うどん","そば"]];
+let wordPairs = JSON.parse(localStorage.getItem('wordwolf_data')) || defaultPairs;
+let deck = [], current = 0, timer;
 
-    window.onload = () => {
-      wordPairs = JSON.parse(localStorage.getItem('wordwolf_data')) || defaultPairs;
-      updateWordListUI();
-    };
+// UI
+function toggleSidebar(){ sidebar.classList.toggle("open"); overlay.classList.toggle("show"); }
+function closeAll(){ sidebar.classList.remove("open"); overlay.classList.remove("show"); }
 
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-    function toggleWordList() { document.getElementById('listHeader').classList.toggle('open'); document.getElementById('wordListArea').classList.toggle('show'); }
-    function toggleAbout() { document.getElementById('aboutModal').classList.toggle('show'); document.getElementById('overlay').classList.toggle('show'); }
-    function closeAll() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('aboutModal').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
+// 単語追加
+function isDuplicate(a,b){
+  return wordPairs.some(p => (p[0]===a && p[1]===b)||(p[0]===b && p[1]===a));
+}
 
-    function isDuplicate(a, b) {
-      return wordPairs.some(pair => 
-        (pair === a && pair === b) || (pair === b && pair === a)
-      );
-    }
+function addNewPair(){
+  const a=newWordA.value.trim();
+  const b=newWordB.value.trim();
+  if(!a||!b) return alert("入力してください");
+  if(a===b) return alert("同じ単語NG");
+  if(isDuplicate(a,b)) return alert("重複");
+  wordPairs.push([a,b]);
+  save();
+  updateUI();
+}
 
-    function addNewPair() {
-      const a = document.getElementById('newWordA').value.trim();
-      const b = document.getElementById('newWordB').value.trim();
-      if(!a || !b) return alert("両方の単語を入力してください");
-      if(a === b) return alert("同じ単語は登録できません");
-      if(isDuplicate(a, b)) { alert("そのペアは既に登録されています！"); return; }
-      wordPairs.push([a, b]);
-      saveData();
-      updateWordListUI();
-      document.getElementById('newWordA').value = "";
-      document.getElementById('newWordB').value = "";
-    }
+// 保存
+function save(){ localStorage.setItem("wordwolf_data",JSON.stringify(wordPairs)); }
 
-    function exportData() {
-      const blob = new Blob([JSON.stringify(wordPairs, null, 2)], {type: "application/json"});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "wordwolf_backup.json";
-      a.click();
-    }
+// UI更新
+function updateUI(){
+  wordCount.innerText = wordPairs.length;
+  wordListArea.innerHTML = wordPairs.map((p,i)=>
+    `<div>${p[0]} / ${p[1]} <button onclick="del(${i})">削除</button></div>`
+  ).join("");
+}
 
-    function importData(input) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            let addedCount = 0;
-            imported.forEach(pair => {
-              if(Array.isArray(pair) && pair.length === 2) {
-                const a = pair.trim(), b = pair.trim();
-                if(!isDuplicate(a, b) && a !== b) { wordPairs.push([a, b]); addedCount++; }
-              }
-            });
-            saveData();
-            updateWordListUI();
-            alert(`${addedCount}件の新しいペアを追加しました！`);
-          }
-        } catch (err) { alert("正しいファイル形式ではありません。"); }
-      };
-      reader.readAsText(input.files);
-    }
+function del(i){ wordPairs.splice(i,1); save(); updateUI(); }
 
-    function deletePair(index) {
-      if(confirm("このペアを削除しますか？")) { wordPairs.splice(index, 1); saveData(); updateWordListUI(); }
-    }
+// ゲーム開始
+function startGame(){
+  const p=parseInt(playerCount.value);
+  const w=parseInt(wolfCount.value);
+  if(w>=p) return alert("人狼多すぎ");
 
-    function saveData() { localStorage.setItem('wordwolf_data', JSON.stringify(wordPairs)); }
+  const pair = wordPairs[Math.floor(Math.random()*wordPairs.length)];
+  const flip = Math.random()>0.5;
 
-    function updateWordListUI() {
-      document.getElementById('wordCount').innerText = wordPairs.length;
-      document.getElementById('wordListArea').innerHTML = wordPairs.map((p, i) => `
-        <div class="word-item">
-          <span>${p} / ${p}</span>
-          <button class="delete-btn" onclick="deletePair(${i})">削除</button>
-        </div>
-      `).join('');
-    }
+  const citizenWord = flip ? pair[0] : pair[1];
+  const wolfWord    = flip ? pair[1] : pair[0];
 
-    // ゲーム開始のロジック
-    function startGame() {
-      const pCount = parseInt(document.getElementById('playerCount').value);
-      const wCount = parseInt(document.getElementById('wolfCount').value);
-      
-      if(wordPairs.length === 0) return alert("単語を登録してください");
-      if(wCount < 1) return alert("人狼は1人以上必要です");
-      if(wCount >= pCount) return alert("人狼の数は合計人数より少なくしてください");
+  deck=[];
+  for(let i=0;i<p-w;i++) deck.push(citizenWord);
+  for(let i=0;i<w;i++) deck.push(wolfWord);
 
-      const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
-      const isBWolf = Math.random() > 0.5;
-      const citizenWord = isBWolf ? pair : pair;
-      const wolfWord = isBWolf ? pair : pair;
+  deck.sort(()=>Math.random()-0.5);
 
-      // デッキを空にしてから再構築
-      deck = [];
-      for(let i = 0; i < (pCount - wCount); i++) deck.push(citizenWord);
-      for(let i = 0; i < wCount; i++) deck.push(wolfWord);
-      
-      // シャッフル
-      deck.sort(() => Math.random() - 0.5);
-      
-      current = 0;
-      goReady();
-    }
+  current=0;
+  goReady();
+}
 
-    function goReady() {
-      showScreen('screen-ready');
-      document.getElementById('player-label').innerText = `${current + 1}人目の確認`;
-    }
+// 進行
+function goReady(){
+  show("screen-ready");
+  player-label.innerText = `${current+1}人目`;
+}
 
-    function showWord() {
-      showScreen('screen-word');
-      // 表示エリアを一旦空にしてからセット
-      const displayArea = document.getElementById('display-area');
-      displayArea.innerText = deck[current];
-      
-      const nextBtn = document.getElementById('next-btn');
-      if (current === deck.length - 1) {
-        nextBtn.innerText = "全員完了（タイマー開始）";
-      } else {
-        nextBtn.innerText = "確認しました";
-      }
-    }
+function showWord(){
+  show("screen-word");
+  display-area.innerText = deck[current];
+  next-btn.innerText = current===deck.length-1 ? "開始" : "次";
+}
 
-    function nextStep() {
-      if (current < deck.length - 1) {
-        current++;
-        goReady();
-      } else {
-        startTimer();
-      }
-    }
+function nextStep(){
+  if(current<deck.length-1){
+    current++;
+    goReady();
+  }else{
+    startTimer();
+  }
+}
 
-    function startTimer() {
-      showScreen('screen-timer');
-      let sec = parseInt(document.getElementById('limitTime').value) * 60;
-      updateDisplay(sec);
-      if(timer) clearInterval(timer); // 既存のタイマーがあればクリア
-      timer = setInterval(() => {
-        sec--;
-        updateDisplay(sec);
-        if (sec <= 0) timeUp("時間切れ！");
-      }, 1000);
-    }
+// タイマー
+function startTimer(){
+  show("screen-timer");
+  let sec = parseInt(limitTime.value)*60;
+  timer=setInterval(()=>{
+    sec--;
+    timer-display.innerText = `${Math.floor(sec/60)}:${sec%60}`;
+    if(sec<=0) finish("時間切れ");
+  },1000);
+}
 
-    function updateDisplay(sec) {
-      const min = Math.floor(sec / 60);
-      const s = sec % 60;
-      document.getElementById('timer-display').innerText = `${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
+function forceStop(){ finish("終了"); }
 
-    function forceStop() { timeUp("強制終了！"); }
+function finish(t){
+  clearInterval(timer);
+  finish-title.innerText=t;
+  show("screen-finish");
+}
 
-    function timeUp(txt) {
-      clearInterval(timer);
-      document.getElementById('finish-title').innerText = txt;
-      showScreen('screen-finish');
-    }
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-  </script>
+updateUI();
+</script>
+
+</body>
+</html>
