@@ -33,6 +33,8 @@
     hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
     .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 2000; width: 80%; max-width: 320px; display: none; }
     .modal.show { display: block; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .setting-row input { width: 80px; }
   </style>
 </head>
 <body>
@@ -75,8 +77,18 @@
   <div class="card">
     <div id="screen-start" class="screen active">
       <h2>ゲーム設定</h2>
-      <p>人数：<input type="number" id="playerCount" value="3" min="3" style="width:60px;"> 人</p>
-      <p>時間：<input type="number" id="limitTime" value="3" min="1" style="width:60px;"> 分</p>
+      <div class="setting-row">
+        <label>合計人数：</label>
+        <input type="number" id="playerCount" value="3" min="3">
+      </div>
+      <div class="setting-row">
+        <label>人狼の数：</label>
+        <input type="number" id="wolfCount" value="1" min="1">
+      </div>
+      <div class="setting-row">
+        <label>制限時間 (分)：</label>
+        <input type="number" id="limitTime" value="3" min="1">
+      </div>
       <button onclick="startGame()">ゲーム開始</button>
     </div>
     <div id="screen-ready" class="screen"><h2 id="player-label"></h2><p>他の方に見られないよう確認してください</p><button onclick="showWord()">ワードを表示する</button></div>
@@ -99,108 +111,5 @@
     function toggleAbout() { document.getElementById('aboutModal').classList.toggle('show'); document.getElementById('overlay').classList.toggle('show'); }
     function closeAll() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('aboutModal').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
 
-    // 重複をチェックする共通関数
     function isDuplicate(a, b) {
-      return wordPairs.some(pair => 
-        (pair[0] === a && pair[1] === b) || (pair[0] === b && pair[1] === a)
-      );
-    }
-
-    function addNewPair() {
-      const a = document.getElementById('newWordA').value.trim();
-      const b = document.getElementById('newWordB').value.trim();
-      if(!a || !b) return alert("両方の単語を入力してください");
-      if(a === b) return alert("同じ単語は登録できません");
-      
-      if(isDuplicate(a, b)) {
-        alert("そのペアは既に登録されています！");
-        return;
-      }
-
-      wordPairs.push([a, b]);
-      saveData();
-      updateWordListUI();
-      document.getElementById('newWordA').value = "";
-      document.getElementById('newWordB').value = "";
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(wordPairs, null, 2)], {type: "application/json"});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "wordwolf_backup.json";
-      a.click();
-    }
-
-    function importData(input) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            let addedCount = 0;
-            imported.forEach(pair => {
-              if(Array.isArray(pair) && pair.length === 2) {
-                const a = pair[0].trim(), b = pair[1].trim();
-                if(!isDuplicate(a, b) && a !== b) {
-                  wordPairs.push([a, b]);
-                  addedCount++;
-                }
-              }
-            });
-            saveData();
-            updateWordListUI();
-            alert(`${addedCount}件の新しいペアを追加しました！(重複は無視されました)`);
-          }
-        } catch (err) { alert("正しいファイル形式ではありません。"); }
-      };
-      reader.readAsText(input.files[0]);
-    }
-
-    function deletePair(index) {
-      if(confirm("このペアを削除しますか？")) {
-        wordPairs.splice(index, 1);
-        saveData();
-        updateWordListUI();
-      }
-    }
-
-    function saveData() { localStorage.setItem('wordwolf_data', JSON.stringify(wordPairs)); }
-
-    function updateWordListUI() {
-      document.getElementById('wordCount').innerText = wordPairs.length;
-      document.getElementById('wordListArea').innerHTML = wordPairs.map((p, i) => `
-        <div class="word-item">
-          <span>${p[0]} / ${p[1]}</span>
-          <button class="delete-btn" onclick="deletePair(${i})">削除</button>
-        </div>
-      `).join('');
-    }
-
-    function startGame() {
-      const pCount = parseInt(document.getElementById('playerCount').value);
-      if(wordPairs.length === 0) return alert("単語を登録してください");
-      const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
-      const isBWolf = Math.random() > 0.5;
-      const cW = isBWolf ? pair[0] : pair[1];
-      const wW = isBWolf ? pair[1] : pair[0];
-      deck = Array(pCount - 1).fill(cW).concat([wW]).sort(() => Math.random() - 0.5);
-      current = 0; goReady();
-    }
-
-    function goReady() { showScreen('screen-ready'); document.getElementById('player-label').innerText = `${current + 1}人目の抽選`; }
-    function showWord() { showScreen('screen-word'); document.getElementById('display-area').innerText = deck[current]; document.getElementById('next-btn').innerText = (current === deck.length - 1) ? "全員完了" : "確認しました"; }
-    function nextStep() { if (current < deck.length - 1) { current++; goReady(); } else { startTimer(); } }
-    function startTimer() {
-      showScreen('screen-timer');
-      let sec = parseInt(document.getElementById('limitTime').value) * 60;
-      updateDisplay(sec);
-      timer = setInterval(() => { sec--; updateDisplay(sec); if (sec <= 0) timeUp("時間切れ！"); }, 1000);
-    }
-    function updateDisplay(sec) { document.getElementById('timer-display').innerText = `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`; }
-    function forceStop() { timeUp("強制終了！"); }
-    function timeUp(txt) { clearInterval(timer); document.getElementById('finish-title').innerText = txt; showScreen('screen-finish'); }
-    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-  </script>
-</body>
-</html>
+      return wordPairs.
