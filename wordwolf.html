@@ -112,4 +112,100 @@
     function closeAll() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('aboutModal').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
 
     function isDuplicate(a, b) {
-      return wordPairs.
+      return wordPairs.some(pair => 
+        (pair === a && pair === b) || (pair === b && pair === a)
+      );
+    }
+
+    function addNewPair() {
+      const a = document.getElementById('newWordA').value.trim();
+      const b = document.getElementById('newWordB').value.trim();
+      if(!a || !b) return alert("両方の単語を入力してください");
+      if(a === b) return alert("同じ単語は登録できません");
+      if(isDuplicate(a, b)) { alert("そのペアは既に登録されています！"); return; }
+      wordPairs.push([a, b]);
+      saveData();
+      updateWordListUI();
+      document.getElementById('newWordA').value = "";
+      document.getElementById('newWordB').value = "";
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(wordPairs, null, 2)], {type: "application/json"});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "wordwolf_backup.json";
+      a.click();
+    }
+
+    function importData(input) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            let addedCount = 0;
+            imported.forEach(pair => {
+              if(Array.isArray(pair) && pair.length === 2) {
+                const a = pair.trim(), b = pair.trim();
+                if(!isDuplicate(a, b) && a !== b) { wordPairs.push([a, b]); addedCount++; }
+              }
+            });
+            saveData();
+            updateWordListUI();
+            alert(`${addedCount}件の新しいペアを追加しました！`);
+          }
+        } catch (err) { alert("正しいファイル形式ではありません。"); }
+      };
+      reader.readAsText(input.files);
+    }
+
+    function deletePair(index) {
+      if(confirm("このペアを削除しますか？")) { wordPairs.splice(index, 1); saveData(); updateWordListUI(); }
+    }
+
+    function saveData() { localStorage.setItem('wordwolf_data', JSON.stringify(wordPairs)); }
+
+    function updateWordListUI() {
+      document.getElementById('wordCount').innerText = wordPairs.length;
+      document.getElementById('wordListArea').innerHTML = wordPairs.map((p, i) => `
+        <div class="word-item">
+          <span>${p} / ${p}</span>
+          <button class="delete-btn" onclick="deletePair(${i})">削除</button>
+        </div>
+      `).join('');
+    }
+
+    function startGame() {
+      const pCount = parseInt(document.getElementById('playerCount').value);
+      const wCount = parseInt(document.getElementById('wolfCount').value);
+      
+      if(wordPairs.length === 0) return alert("単語を登録してください");
+      if(wCount < 1) return alert("人狼は1人以上必要です");
+      if(wCount >= pCount) return alert("人狼の数は合計人数より少なくしてください");
+
+      const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+      const isBWolf = Math.random() > 0.5;
+      const citizenWord = isBWolf ? pair : pair;
+      const wolfWord = isBWolf ? pair : pair;
+
+      deck = Array(pCount - wCount).fill(citizenWord).concat(Array(wCount).fill(wolfWord));
+      deck.sort(() => Math.random() - 0.5);
+      
+      current = 0; goReady();
+    }
+
+    function goReady() { showScreen('screen-ready'); document.getElementById('player-label').innerText = `${current + 1}人目の抽選`; }
+    function showWord() { showScreen('screen-word'); document.getElementById('display-area').innerText = deck[current]; document.getElementById('next-btn').innerText = (current === deck.length - 1) ? "全員完了" : "確認しました"; }
+    function nextStep() { if (current < deck.length - 1) { current++; goReady(); } else { startTimer(); } }
+    function startTimer() {
+      showScreen('screen-timer');
+      let sec = parseInt(document.getElementById('limitTime').value) * 60;
+      updateDisplay(sec);
+      timer = setInterval(() => { sec--; updateDisplay(sec); if (sec <= 0) timeUp("時間切れ！"); }, 1000);
+    }
+    function updateDisplay(sec) { document.getElementById('timer-display').innerText = `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`; }
+    function forceStop() { timeUp("強制終了！"); }
+    function timeUp(txt) { clearInterval(timer); document.getElementById('finish-title').innerText = txt; showScreen('screen-finish'); }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+  </script>
