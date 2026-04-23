@@ -10,7 +10,7 @@
     :root {
       --primary: #111;
       --danger: #444;
-      --bg: #0a0a0a;
+      --bg: #fff;
     }
 
     body {
@@ -18,7 +18,7 @@
       text-align: center;
       padding: 24px;
       background-color: var(--bg);
-      color: #e0e0e0;
+      color: #000;
       margin: 0;
     }
 
@@ -29,10 +29,10 @@
       width:40px;
       font-size: 22px;
       background: none;
-      border: none;
+      border: 1px solid #000 ;
       cursor: pointer;
       z-index: 9999;
-      color: #aaa;
+      color: #000;
       padding: 0px;
     }
 
@@ -42,7 +42,7 @@
       right: -300px;
       width: 280px;
       height: 100%;
-      background: #111;
+      background: #fff;
       box-shadow: -2px 0 15px rgba(255,255,255,0.05);
       transition: 0.3s;
       z-index: 1000;
@@ -72,8 +72,9 @@
     }
 
     .card {
-      background: #111;
+      background: #fff;
       padding: 28px;
+      border: 1px solid #000;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(255,255,255,0.05);
       max-width: 400px;
@@ -89,9 +90,9 @@
     }
 
     button {
-      background: var(--primary);
-      color: #eee;
-      border: none;
+      background: #fff;
+      color: #000;
+      border: 1px solid #000;
       padding: 10px;
       width: 100%;
       border-radius: 6px;
@@ -103,8 +104,8 @@
     }
 
     button:hover {
-      background: #fff;
-      color: #000;
+      background: #000;
+      color: #fff;
       box-shadow: 0 0 10px rgba(255,255,255,0.6),
                   0 0 20px rgba(255,255,255,0.3);
       transform: translateY(-1px);
@@ -116,17 +117,17 @@
     }
 
     .btn-stop {
-      background: #222;
+      background: #fff;
     }
 
     .btn-outline {
-      background: #111;
-      color: #ccc;
+      background: #fff;
+      color: #000;
       margin-top: 4px;
     }
 
     .btn-info {
-      background: #222;
+      background: #fff;
       margin-top: 18px;
     }
 
@@ -137,24 +138,24 @@
       margin: 4px 0;
       border: 1px solid #333;
       border-radius: 4px;
-      background: #0a0a0a;
-      color: #eee;
+      background: #fff;
+      color: #000;
     }
 
     .word-box {
       font-size: 30px;
       font-weight: bold;
-      color: #fff;
+      color: #000;
       margin: 28px 0;
       padding: 18px;
-      border: 2px solid #555;
+      border: 2px solid #000;
     }
 
     #timer-display {
       font-size: 56px;
       font-weight: bold;
       margin: 8px 0;
-      color: #fff;
+      color: #000;
     }
 
     .list-header {
@@ -190,8 +191,8 @@
     }
 
     .delete-btn {
-      background: #111;
-      color: #888;
+      background: #fff;
+      color: #000;
       width: auto;
       padding: 3px 6px;
       margin: 0;
@@ -209,7 +210,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #111;
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 5px 25px rgba(255,255,255,0.08);
@@ -289,7 +290,7 @@
 
     <div id="screen-finish" class="screen">
       <h1 id="finish-title">終了！</h1>
-      <button onclick="location.reload()" style="background:#222;">最初に戻る</button>
+      <button onclick="location.reload()" >最初に戻る</button>
     </div>
   </div>
 
